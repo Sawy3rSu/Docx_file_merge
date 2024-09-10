@@ -109,7 +109,7 @@
 
 ## 示例
 
-假设你的输入文件夹为 `C:\Users\Yi\Desktop\weibo_scraper\合并`，并且你想将合并后的文件保存在同一目录下，文件名为 `merged.docx`。
+假设你的输入文件夹为 `C:\Users\Yi\Desktop\scraper`，并且你想将合并后的文件保存在同一目录下，文件名为 `merged.docx`。
 
 1. **编辑脚本**：
    - 修改 `input_directory` 和 `output_filename` 变量。
