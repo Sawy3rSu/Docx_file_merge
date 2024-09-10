@@ -1,6 +1,6 @@
 ### README.md
 
-```markdown
+
 # 合并多个 .docx 文件脚本
 
 ## 功能描述
