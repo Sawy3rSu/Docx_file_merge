@@ -1,11 +1,10 @@
 ### README.md
 
-
 # 合并多个 .docx 文件脚本
 
 ## 功能描述
 
-本脚本用于合并同一目录下的所有 `.docx` 文件，并在每个文件内容前加上文件名。每个文件内容之间通过分页符进行区分。
+本脚本用于合并同一目录下的所有 `.docx` 文件保存到 `merged.docx`，在 `merged.docx`中保存的每个文件内容前加上文件名，并把文件名保存为标题格式，每个文件内容之间通过分页符进行区分，以便在查看时容易区分不同文件的内容。
 
 ## 环境准备
 
@@ -34,84 +33,73 @@
      python merge_docx.py
      ```
 
-## 脚本结构
+## 工作原理和步骤
 
-### 文件结构
+### 1. 初始化输出文档
+- 创建一个新的 Word 文档对象 (`Document`)，用于存放合并后的所有内容。
+- 这个新的文档将作为最终输出的文档。
 
-```plaintext
-- merge_docx.py
-- README.md
-```
+### 2. 遍历指定目录
+- 使用 `os.listdir()` 函数列出指定目录下的所有文件。
+- 通过 `os.path.join()` 构建每个文件的完整路径。
 
-### 脚本代码
+### 3. 读取每个文件
+- 对于每个 `.docx` 文件，使用 `Document` 类读取文件内容。
+- 使用 `Document` 类的对象来访问每个文件的内容。
 
-```python
-from docx import Document
-import os
+### 4. 添加文件名并设置为标题格式
+- 在每个文件内容前添加一个段落，包含文件名。
+- 设置这个段落的样式为 `Heading 1`，这将使文件名以加粗的标题形式出现，并利用 Word 的标题样式功能。
 
-def merge_docx_files(output_filename, directory):
-    """
-    合并同一目录下的所有.docx文件到一个文档中，并在每个文件内容前加上文件名。
-    
-    :param output_filename: 输出文件名（含路径）
-    :param directory: 包含.docx文件的目录
-    """
-    # 创建一个新的Document对象作为输出文档
-    merged_document = Document()
+### 5. 追加内容
+- 将当前文件的所有段落逐段追加到输出文档中。
+- 逐段追加可以确保内容不会丢失，并且可以保留原文档中的格式。
+- 为了复制段落格式，需要将原文档中的段落样式复制到新文档中。
+- 为了复制段落内的文本格式（如加粗、斜体等），需要逐个复制 `Run` 对象，并设置相应的属性。
 
-    # 遍历指定目录下的所有.docx文件
-    for filename in os.listdir(directory):
-        if filename.endswith('.docx'):
-            file_path = os.path.join(directory, filename)
-            print(f"正在处理文件: {file_path}")
-            
-            # 读取当前文件
-            current_document = Document(file_path)
-            
-            # 在当前文件内容前加上文件名，并设置为标题格式
-            heading_paragraph = merged_document.add_paragraph()
-            heading_run = heading_paragraph.add_run(f'{filename}\n\n')
-            heading_paragraph.style = 'Heading 1'  # 设置为标题样式
-            
-            # 将当前文件的内容逐段追加到输出文档
-            for paragraph in current_document.paragraphs:
-                new_paragraph = merged_document.add_paragraph(paragraph.text)
-                # 复制段落格式
-                new_paragraph.style = current_document.styles[paragraph.style.name]
-                
-                # 复制段落内的Run对象
-                for run in paragraph.runs:
-                    new_run = new_paragraph.add_run(run.text or '')
-                    new_run.bold = run.bold
-                    new_run.italic = run.italic
-                    new_run.underline = run.underline
-                    new_run.font.size = run.font.size
-                    new_run.font.name = run.font.name
-                    
-            # 添加一个分页符以区分不同文件
-            merged_document.add_page_break()
+### 6. 添加分隔符
+- 在每个文件内容之后添加一个分页符，以便在打印或查看时更容易区分文件。
+- 分页符可以确保每个文件的内容都在新的页面开始，从而清晰地区分不同文件的内容。
 
-    # 保存合并后的文档
-    output_path = os.path.join(directory, output_filename)
-    print(f"尝试保存到: {output_path}")
-    try:
-        merged_document.save(output_path)
-        print(f"合并完成，已保存为 {output_filename}")
-    except Exception as e:
-        print(f"保存文件时发生错误: {e}")
+### 7. 保存输出文档
+- 将最终合并后的文档保存到指定的输出路径。
+- 确保输出路径存在，并且有足够的权限写入文件。
 
-# 定义输入和输出目录及文件名
-input_directory = r'C:\Users\Yi\Desktop\scraper'
-output_filename = 'merged.docx'
+### 详细步骤说明
 
-# 调用函数合并文件
-merge_docx_files(output_filename, input_directory)
-```
+1. **初始化输出文档**
+   - 创建一个新的 `Document` 对象，作为最终的输出文档。
+   - 这个文档将包含所有合并后的文件内容。
+
+2. **遍历指定目录**
+   - 列出指定目录下的所有文件，只处理 `.docx` 文件。
+   - 使用 `os.path.join()` 构建每个文件的完整路径，确保路径格式正确。
+
+3. **读取每个文件**
+   - 使用 `Document` 类读取每个 `.docx` 文件的内容。
+   - 每个文件将被逐段处理。
+
+4. **添加文件名并设置为标题格式**
+   - 在每个文件内容前添加一个段落，包含文件名。
+   - 设置段落样式为 `Heading 1`，这将使文件名以加粗的标题形式出现，并利用 Word 的标题样式功能。
+
+5. **追加内容**
+   - 逐段追加当前文件的内容到输出文档中。
+   - 复制原文档中的段落样式，确保格式一致。
+   - 复制原文档中的 `Run` 对象，并设置相应的属性（如加粗、斜体等）。
+
+6. **添加分隔符**
+   - 在每个文件内容之后添加一个分页符。
+   - 分页符可以确保每个文件的内容都在新的页面开始，从而清晰地区分不同文件的内容。
+
+7. **保存输出文档**
+   - 将最终合并后的文档保存到指定的输出路径。
+   - 确保输出路径存在，并且有足够的权限写入文件。
 
 ## 注意事项
 
 1. **路径格式**：
-   - 在Windows系统中，路径中的反斜杠`\`需要转义为`\\`，或者使用原始字符串`r'C:\path\to\your\directory'`。
+   - 在Windows系统中，路径中的反斜杠 `\` 需要转义为 `\\`，或者使用原始字符串 `r'C:\path\to\your\directory'`。
 
 2. **权限**：
    - 确保你有足够的权限在指定目录下读取文件和写入文件。
@@ -121,7 +109,7 @@ merge_docx_files(output_filename, input_directory)
 
 ## 示例
 
-假设你的输入文件夹为 `C:\Users\Yi\Desktop\scraper`，并且你想将合并后的文件保存在同一目录下，文件名为 `merged.docx`。
+假设你的输入文件夹为 `C:\Users\Yi\Desktop\weibo_scraper\合并`，并且你想将合并后的文件保存在同一目录下，文件名为 `merged.docx`。
 
 1. **编辑脚本**：
    - 修改 `input_directory` 和 `output_filename` 变量。
